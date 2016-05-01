@@ -1,0 +1,6 @@
+.idea
+.vagrant
+.DS_Store
+.tmp
+environments/production/modules
+*.jar
