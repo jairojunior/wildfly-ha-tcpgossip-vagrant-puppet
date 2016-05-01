@@ -1,6 +1,9 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+WILDFLY_INSTANCES = (1..2)
+INITIAL_IP = 20
+
 Vagrant.configure(2) do |config|
   if Vagrant.has_plugin?('vagrant-cachier')
     config.cache.scope = :box
@@ -27,39 +30,23 @@ Vagrant.configure(2) do |config|
     end
   end
 
-  config.vm.define 'instance1' do |v|
-    v.vm.box = 'puppetlabs/centos-7.2-64-puppet'
-    v.vm.host_name = 'centos-7-instance1'
+  WILDFLY_INSTANCES.each do |instance_number|
+    config.vm.define "instance#{instance_number}" do |v|
+      v.vm.box = 'puppetlabs/centos-7.2-64-puppet'
+      v.vm.host_name = "centos-7-instance#{instance_number}"
 
-    v.vm.provider 'virtualbox' do |virtualbox|
-      virtualbox.name = 'centos-7-instance1'
-      virtualbox.memory = 1024
-    end
+      v.vm.provider 'virtualbox' do |virtualbox|
+        virtualbox.name = "centos-7-instance#{instance_number}"
+        virtualbox.memory = 1024
+      end
 
-    v.vm.network 'private_network', ip: '172.28.128.20'
+      v.vm.network 'private_network', ip: "172.28.128.#{INITIAL_IP + instance_number}"
 
-    v.vm.provision :puppet do |puppet|
-      puppet.environment_path = 'environments'
-      puppet.environment = 'production'
-      puppet.options = '--verbose --debug --trace --profile'
-    end
-  end
-
-  config.vm.define 'instance2' do |v|
-    v.vm.box = 'puppetlabs/centos-7.2-64-puppet'
-    v.vm.host_name = 'centos-7-instance2'
-
-    v.vm.provider 'virtualbox' do |virtualbox|
-      virtualbox.name = 'centos-7-instance2'
-      virtualbox.memory = 1024
-    end
-
-    v.vm.network 'private_network', ip: '172.28.128.30'
-
-    v.vm.provision :puppet do |puppet|
-      puppet.environment_path = 'environments'
-      puppet.environment = 'production'
-      puppet.options = '--verbose --debug --trace --profile'
+      v.vm.provision :puppet do |puppet|
+        puppet.environment_path = 'environments'
+        puppet.environment = 'production'
+        puppet.options = '--verbose --debug --trace --profile'
+      end
     end
   end
 

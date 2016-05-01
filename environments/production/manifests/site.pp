@@ -29,7 +29,7 @@ class profile::wildfly {
     initial_hosts       => '172.28.128.1[12001]',
     num_initial_members => 2
   }
-
+  ->
   wildfly::util::resource { '/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=proxy1':
     content => {
       'host' => '172.28.128.10',
@@ -41,7 +41,8 @@ class profile::wildfly {
     balancer             => 'mycluster',
     load_balancing_group => 'demolb',
     proxy_url            => '/',
-    proxies              => ['proxy1']
+    proxies              => ['proxy1'],
+    sticky_session       => false,
   }
   ~>
   wildfly::util::reload { 'for modcluster': }

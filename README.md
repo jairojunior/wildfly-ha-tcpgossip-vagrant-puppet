@@ -16,8 +16,6 @@ OR
 
 `wget http://central.maven.org/maven2/org/jgroups/jgroups/3.2.13.Final/jgroups-3.2.13.Final.jar`
 
-`vagrant up gossiprouter --provider=docker`
-
 `gem install r10k --no-ri --no-rdock`
 
 `r10k puppetfile install`
@@ -33,7 +31,7 @@ Multi-machine environment with:
 * instance1 (centos-7-instance1) (Wildfly 9.0.2 Standalone Full HA)
 * instance2 (centos-7-instance2)(Wildfly 9.0.2 Standalone Full HA)
 
-New instances can be provisioned with the following convention: **instanceN (centos-7-instanceN)**
+New instances can be provisioned with incrementing `WILDFLY_INSTANCES` range in Vagrantfile.
 
 Check: `environments/production/manifests/site.pp`
 
@@ -48,9 +46,9 @@ Using:
 
 ## Console
 
-http://172.28.128.20:9990
+http://172.28.128.21:9990
 
-http://172.28.128.30:9990
+http://172.28.128.22:9990
 
 user: wildfly
 
