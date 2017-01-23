@@ -22,12 +22,6 @@ Vagrant.configure(2) do |config|
     end
 
     v.vm.network 'private_network', ip: '172.28.128.10'
-
-    v.vm.provision :puppet do |puppet|
-      puppet.environment_path = 'environments'
-      puppet.environment = 'production'
-      puppet.options = '--verbose --debug --trace --profile'
-    end
   end
 
   WILDFLY_INSTANCES.each do |instance_number|
@@ -42,12 +36,13 @@ Vagrant.configure(2) do |config|
 
       v.vm.network 'private_network', ip: "172.28.128.#{INITIAL_IP + instance_number}"
 
-      v.vm.provision :puppet do |puppet|
-        puppet.environment_path = 'environments'
-        puppet.environment = 'production'
-        puppet.options = '--verbose --debug --trace --profile'
-      end
     end
+  end
+
+  config.vm.provision :puppet do |puppet|
+    puppet.environment_path = 'environments'
+    puppet.environment = 'production'
+    #puppet.options = '--verbose --debug --trace --profile'
   end
 
   config.vm.define 'gossiprouter' do |c|

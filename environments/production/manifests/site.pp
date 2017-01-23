@@ -30,7 +30,7 @@ class profile::wildfly {
     num_initial_members => 2
   }
   ->
-  wildfly::util::resource { '/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=proxy1':
+  wildfly::resource { '/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=proxy1':
     content => {
       'host' => '172.28.128.10',
       'port' => '6666'
@@ -45,7 +45,7 @@ class profile::wildfly {
     sticky_session       => false,
   }
   ~>
-  wildfly::util::reload { 'for modcluster': }
+  wildfly::reload { 'for modcluster': }
 
   Class['java'] ->
     Class['wildfly'] ->
