@@ -1,4 +1,4 @@
-node 'centos-7-load-balancer' {
+ node 'centos-7-load-balancer' {
 
   include profile::httpd::cluster
 
@@ -16,40 +16,46 @@ class profile::wildfly {
   include firewalld_appserver
 
   class { 'wildfly':
-    java_home   => '/etc/alternatives/java_sdk',
-    config      => 'standalone-full-ha.xml',
-    public_bind => $::ipaddress_enp0s8
+    java_home  => '/etc/alternatives/java_sdk',
+    config     => 'standalone-full-ha.xml',
+    mgmt_user  => {
+      username => 'wildfly',
+      password => 'wildfly',
+    },
+    properties => {
+      'jboss.bind.address' => $facts['networking']['interfaces']['enp0s8']['ip']
+    }
   }
 
   wildfly::deployment { 'cluster-demo.war':
     source   => 'file:///vagrant/cluster-demo.war',
   }
 
-  wildfly::jgroups::tcpgossip { 'TCPGOSSIP':
+  wildfly::jgroups::stack::tcpgossip { 'TCPGOSSIP':
     initial_hosts       => '172.28.128.1[12001]',
     num_initial_members => 2
   }
-  ->
-  wildfly::resource { '/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=proxy1':
+
+  -> wildfly::resource { '/socket-binding-group=standard-sockets/remote-destination-outbound-socket-binding=proxy1':
     content => {
       'host' => '172.28.128.10',
       'port' => '6666'
     }
   }
-  ->
-  wildfly::modcluster::config { 'Modcluster mybalancer':
+
+  -> wildfly::modcluster::config { 'Modcluster mybalancer':
     balancer             => 'mycluster',
     load_balancing_group => 'demolb',
     proxy_url            => '/',
     proxies              => ['proxy1'],
     sticky_session       => false,
   }
-  ~>
-  wildfly::reload { 'for modcluster': }
 
-  Class['java'] ->
-    Class['wildfly'] ->
-      Class['firewalld_appserver']
+  ~> wildfly::reload { 'reload': }
+
+  Class['java']
+    -> Class['wildfly']
+      -> Class['firewalld_appserver']
 
 }
 
@@ -72,16 +78,16 @@ class profile::httpd::cluster {
                           "${modules_dir}/mod_proxy_cluster.so"],
     cleanup      => true,
   }
-  ->
-  class { '::apache::mod::cluster':
+
+  -> class { '::apache::mod::cluster':
     ip                      => '172.28.128.10',
     allowed_network         => '172.28.128.',
     manager_allowed_network => '172.28.128.',
     balancer_name           => 'mycluster',
     version                 => '1.3.1'
   }
-  ->
-  firewalld::custom_service { 'httpd with mod_cluster':
+
+  -> firewalld::custom_service { 'httpd with mod_cluster':
       short       => 'httpd',
       description => 'httpd with mod_cluster',
       port        => [
@@ -98,8 +104,8 @@ class profile::httpd::cluster {
         'ipv4' => '172.28.128.0/24',
       }
   }
-  ->
-  firewalld_service { 'Allow httpd from external zone':
+
+  -> firewalld_service { 'Allow httpd from external zone':
     ensure  => 'present',
     service => 'httpd',
     zone    => 'public',
@@ -133,8 +139,8 @@ class firewalld_appserver {
         'ipv4' => '172.28.128.0/24',
       }
   }
-  ->
-  firewalld_service { 'Allow Wildfly from external zone':
+
+  -> firewalld_service { 'Allow Wildfly from external zone':
     ensure  => 'present',
     service => 'wildfly',
     zone    => 'public',

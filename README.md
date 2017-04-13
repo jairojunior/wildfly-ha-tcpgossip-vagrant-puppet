@@ -14,13 +14,13 @@ Then:
 
 OR
 
-`wget http://central.maven.org/maven2/org/jgroups/jgroups/3.2.13.Final/jgroups-3.2.13.Final.jar`
-
 `gem install r10k --no-ri --no-rdock`
 
 `r10k puppetfile install`
 
-`vagrant up`
+`vagrant up load-balancer instanceN`
+
+`vagrant up gossiprouter --provider docker`
 
 ## Environment
 
@@ -54,12 +54,16 @@ user: wildfly
 
 password: wildfly
 
-## mod_cluster_manager
+### mod_cluster_manager
 
 http://172.28.128.10:6666/mod_cluster_manager
 
-## cluster-demo
+### cluster-demo
 
 cluster-demo is a sample application to test cluster behavior: https://github.com/liweinan/cluster-demo
 
 http://172.28.128.10/cluster-demo
+
+### gossiprouter
+
+vagrant docker-logs gossiprouter
