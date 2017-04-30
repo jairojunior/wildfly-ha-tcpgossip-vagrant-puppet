@@ -1,0 +1,44 @@
+- hosts: appserver
+  become: yes
+  remote_user: root
+  become_user: wildfly
+
+  vars:
+    wildfly_home: /opt/wildfly
+    app_version: 1.5.0
+    checksum: fddd0f2320d79ad16a29b557e30fc94bba0ec4f3e51ee2377dd42d9ff0cfb78f
+
+  environment:
+    JAVA_HOME: /etc/alternatives/java_sdk/
+    PATH: "{{ wildfly_home }}/bin:/bin:/usr/bin:/sbin"
+
+  serial: 1
+
+  pre_tasks:
+    - name: Check deployment content 
+      command: "sha256sum {{ wildfly_home}}/standalone/deployments/hawtio.war"
+      register: current_checksum
+      changed_when: False
+
+    - name: Stop instance in mcm
+      command: "jboss-cli.sh -c '/subsystem=modcluster:disable-context(virtualhost=default-host, context=/hawtio)'"
+      when: "current_checksum.stdout.split(' ')[0] != checksum"
+
+  tasks:
+    - name: Deploy app
+      get_url:
+        url: "http://central.maven.org/maven2/io/hawt/hawtio-web/{{ app_version }}/hawtio-web-{{ app_version }}.war"
+        dest: "{{ wildfly_home}}/standalone/deployments/hawtio.war"
+        mode: 0655
+        checksum: "sha256:{{ checksum }}"
+      notify:
+        - Wait for deployment
+        - Enable instance in mcm
+
+  handlers:
+    - name: Wait for deployment
+      pause:
+        seconds: 15
+
+    - name: Enable instance in mcm
+      command: "jboss-cli.sh -c '/subsystem=modcluster:enable-context(virtualhost=default-host, context=/hawtio)'"

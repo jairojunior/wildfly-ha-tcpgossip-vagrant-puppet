@@ -1,0 +1,15 @@
+- hosts: appserver
+  become: yes
+  remote_user: root
+  become_user: wildfly
+  vars:
+    app_version: 1.4.68
+    checksum: a2b6dff0886a8ccacecfe130655e3f7df3d261d9a16a7b72ce06994aed73ee96
+
+  tasks:
+    - name: Deploy app
+      get_url:
+        url: "http://central.maven.org/maven2/io/hawt/hawtio-web/{{ app_version }}/hawtio-web-{{ app_version }}.war"
+        dest: /opt/wildfly/standalone/deployments/hawtio.war
+        mode: 0655
+        checksum: "sha256:{{ checksum }}"

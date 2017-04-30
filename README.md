@@ -67,3 +67,17 @@ http://172.28.128.10/cluster-demo
 ### gossiprouter
 
 vagrant docker-logs gossiprouter
+
+### Ansible
+
+There are two ansible playbooks:
+
+**wildfly-first-deployment:** Deploys a package to Wildfly instances.
+
+**wildfly-rolling-deployment:** Disables instance in the load balancer, updates deployment, enable instance. One by one, no downtime.
+
+To execute it you'll need ansible installed in your computer:
+
+`ansible-playbook wildfly-first-deployment.yml --ask-pass`
+
+Password for root is: 'puppet'
