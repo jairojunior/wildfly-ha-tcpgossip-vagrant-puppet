@@ -23,7 +23,8 @@ class profile::wildfly {
       password => 'wildfly',
     },
     properties => {
-      'jboss.bind.address' => $facts['networking']['interfaces']['enp0s8']['ip']
+      'jboss.bind.address' => $facts['networking']['interfaces']['enp0s8']['ip'],
+      'jboss.node.name'    => $facts['hostname'],
     }
   }
 

@@ -5,9 +5,9 @@ WILDFLY_INSTANCES = (1..2)
 INITIAL_IP = 20
 
 Vagrant.configure(2) do |config|
+
   if Vagrant.has_plugin?('vagrant-cachier')
     config.cache.scope = :box
-
     config.cache.enable :yum
     config.cache.enable :generic, 'wget' => { cache_dir: '/var/cache/wget' }
   end
